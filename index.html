@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCI — Market Competitive Intelligence | Frontline Education</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b1623;
+    --navy-mid: #111f30;
+    --navy-light: #162840;
+    --navy-border: #1e3a55;
+    --amber: #e8a020;
+    --amber-bright: #f5b638;
+    --amber-dim: rgba(232,160,32,0.12);
+    --teal: #2ab4c0;
+    --teal-dim: rgba(42,180,192,0.1);
+    --red: #e05252;
+    --red-dim: rgba(224,82,82,0.1);
+    --green: #3dba78;
+    --green-dim: rgba(61,186,120,0.1);
+    --text-primary: #e8edf2;
+    --text-secondary: #7a99b8;
+    --text-muted: #3f5f7a;
+    --card-bg: #0f1e2e;
+    --card-border: rgba(30,58,85,0.8);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(42,180,192,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,180,192,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events:none; z-index:0;
+  }
+
+  /* Top bar */
+  header {
+    position: sticky; top:0; z-index:100;
+    background: rgba(11,22,35,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--navy-border);
+    padding: 0 32px;
+    display: flex; align-items:center; justify-content:space-between;
+    height: 60px;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.02em;
+    display: flex; align-items:center; gap: 10px;
+  }
+
+  .logo-badge {
+    background: var(--amber);
+    color: var(--navy);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.12em;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .header-right {
+    display: flex; align-items:center; gap: 16px;
+  }
+
+  .live-dot {
+    display: flex; align-items:center; gap: 6px;
+    font-size: 11px; color: var(--text-secondary);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .live-dot::before {
+    content:'';
+    width:6px; height:6px; border-radius:50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .demo-badge {
+    background: var(--amber-dim);
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+  }
+
+  /* Layout */
+  .layout {
+    position: relative; z-index:1;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 60px);
+  }
+
+  /* Sidebar */
+  aside {
+    border-right: 1px solid var(--navy-border);
+    padding: 28px 20px;
+    display: flex; flex-direction:column; gap: 8px;
+  }
+
+  .sidebar-label {
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin-bottom: 4px;
+    margin-top: 16px;
+  }
+
+  .sidebar-label:first-child { margin-top: 0; }
+
+  .competitor-btn {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-secondary);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .competitor-btn:hover {
+    background: var(--navy-light);
+    border-color: var(--navy-border);
+    color: var(--text-primary);
+  }
+
+  .competitor-btn.active {
+    background: var(--amber-dim);
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  .competitor-btn .btn-name {
+    font-weight: 600;
+    font-size: 14px;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .competitor-btn .btn-meta {
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  .threat-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+
+  .threat-high { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .threat-med  { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+  .threat-low  { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  /* Main */
+  main {
+    padding: 32px 36px;
+    overflow-y: auto;
+  }
+
+  /* Competitor header */
+  .comp-header {
+    margin-bottom: 28px;
+    animation: fadeUp 0.3s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(8px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .comp-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .comp-subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    display: flex; gap: 20px; align-items:center;
+  }
+
+  .comp-tag {
+    display: inline-flex; align-items:center;
+    background: var(--navy-light);
+    border: 1px solid var(--navy-border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-secondary);
+    gap: 5px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px;
+    border-bottom: 1px solid var(--navy-border);
+    margin-bottom: 28px;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 18px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+  }
+
+  .tab-btn:hover { color: var(--text-primary); }
+
+  .tab-btn.active {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+  }
+
+  /* Tab content */
+  .tab-content { display: none; animation: fadeUp 0.25s ease; }
+  .tab-content.active { display: block; }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  /* Cards */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 22px;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    display: flex; align-items:center; gap: 7px;
+  }
+
+  .card-title .icon { font-size: 14px; }
+
+  /* Summary card */
+  .summary-card {
+    background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
+    border: 1px solid var(--navy-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .summary-card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0;
+    height:3px;
+    background: linear-gradient(90deg, var(--amber), var(--teal));
+  }
+
+  .summary-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-primary);
+  }
+
+  /* Insight list */
+  .insight-list { display: flex; flex-direction:column; gap: 10px; }
+
+  .insight-item {
+    display: flex; gap: 10px;
+    align-items: flex-start;
+    padding: 12px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: border-color 0.15s;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  .insight-item:hover { border-color: var(--navy-border); }
+
+  .insight-bullet {
+    flex-shrink:0;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    margin-top: 7px;
+  }
+
+  /* Confidence badges */
+  .badge {
+    display: inline-block;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  .badge-high { background: var(--green-dim); color: var(--green); border:1px solid rgba(61,186,120,0.3); }
+  .badge-med  { background: var(--amber-dim); color: var(--amber); border:1px solid rgba(232,160,32,0.3); }
+  .badge-low  { background: var(--red-dim); color: var(--red); border:1px solid rgba(224,82,82,0.3); }
+
+  /* Timeline for recent moves */
+  .timeline { display: flex; flex-direction:column; gap:0; }
+
+  .timeline-item {
+    display: flex; gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .timeline-item:last-child { border-bottom: none; }
+
+  .timeline-date {
+    flex-shrink:0;
+    width: 80px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    padding-top: 2px;
+  }
+
+  .timeline-dot {
+    flex-shrink: 0;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+  }
+
+  .timeline-content { flex: 1; }
+  .timeline-title { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+  .timeline-desc { font-size: 12.5px; color: var(--text-secondary); line-height: 1.5; }
+
+  /* Battlecard */
+  .battlecard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .bc-section {
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .bc-section.strengths {
+    background: var(--red-dim);
+    border: 1px solid rgba(224,82,82,0.2);
+  }
+
+  .bc-section.weaknesses {
+    background: var(--green-dim);
+    border: 1px solid rgba(61,186,120,0.2);
+  }
+
+  .bc-section.traps {
+    background: var(--amber-dim);
+    border: 1px solid rgba(232,160,32,0.2);
+    grid-column: span 2;
+  }
+
+  .bc-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .bc-title.red { color: var(--red); }
+  .bc-title.green { color: var(--green); }
+  .bc-title.amber { color: var(--amber); }
+
+  .bc-item {
+    display: flex; gap: 8px;
+    margin-bottom: 9px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .bc-item::before {
+    content:'';
+    flex-shrink:0;
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    margin-top: 7px;
+  }
+
+  .bc-section.strengths .bc-item::before { background: var(--red); }
+  .bc-section.weaknesses .bc-item::before { background: var(--green); }
+  .bc-section.traps .bc-item::before { background: var(--amber); }
+
+  /* Stats row */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* MCI Answers / Chat */
+  .chat-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    height: 560px;
+  }
+
+  .chat-panel {
+    display: flex; flex-direction: column;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--navy-border);
+    display: flex; align-items:center; gap: 10px;
+    background: var(--navy-light);
+  }
+
+  .chat-header-text { font-weight: 600; font-size: 14px; }
+  .chat-header-sub { font-size: 11px; color: var(--text-muted); }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-track { background: transparent; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--navy-border); border-radius: 2px; }
+
+  .msg {
+    max-width: 85%;
+    animation: fadeUp 0.2s ease;
+  }
+
+  .msg.user { align-self: flex-end; }
+  .msg.assistant { align-self: flex-start; }
+
+  .msg-bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+
+  .msg.user .msg-bubble {
+    background: var(--amber);
+    color: var(--navy);
+    border-radius: 12px 12px 3px 12px;
+    font-weight: 500;
+  }
+
+  .msg.assistant .msg-bubble {
+    background: var(--navy-light);
+    border: 1px solid var(--navy-border);
+    border-radius: 12px 12px 12px 3px;
+    color: var(--text-primary);
+  }
+
+  .msg-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .msg.user .msg-time { text-align: right; }
+
+  .chat-input-area {
+    padding: 16px;
+    border-top: 1px solid var(--navy-border);
+    display: flex; gap: 10px;
+    background: var(--navy-light);
+  }
+
+  .chat-input {
+    flex:1;
+    background: var(--navy);
+    border: 1px solid var(--navy-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-primary);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .chat-input:focus { border-color: var(--amber); }
+  .chat-input::placeholder { color: var(--text-muted); }
+
+  .chat-send {
+    background: var(--amber);
+    border: none;
+    border-radius: 8px;
+    width: 40px; height: 40px;
+    cursor: pointer;
+    display: flex; align-items:center; justify-content:center;
+    color: var(--navy);
+    font-size: 16px;
+    transition: background 0.15s;
+    flex-shrink:0;
+  }
+
+  .chat-send:hover { background: var(--amber-bright); }
+
+  .suggested-qs {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px;
+    display: flex; flex-direction:column; gap: 8px;
+    overflow-y: auto;
+  }
+
+  .suggested-qs h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .suggested-q {
+    background: var(--navy-light);
+    border: 1px solid var(--navy-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+    line-height: 1.4;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .suggested-q:hover {
+    border-color: var(--amber);
+    color: var(--amber-bright);
+    background: var(--amber-dim);
+  }
+
+  /* Typing indicator */
+  .typing {
+    display: flex; gap: 5px; align-items:center;
+    padding: 12px 16px;
+    background: var(--navy-light);
+    border: 1px solid var(--navy-border);
+    border-radius: 12px 12px 12px 3px;
+    width: fit-content;
+  }
+
+  .typing span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    animation: bounce 1.4s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span>MCI</span>
+    <span class="logo-badge">DEMO</span>
+  </div>
+  <div class="header-right">
+    <div class="live-dot">INTEL UPDATED 2H AGO</div>
+    <div class="demo-badge">STAKEHOLDER PREVIEW</div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="sidebar-label">Competitors</div>
+
+    <button class="competitor-btn active" onclick="selectCompetitor('powerschool', this)">
+      <span class="btn-name"><span class="threat-dot threat-high"></span>PowerSchool</span>
+      <span class="btn-meta">SIS · HCM · Finance</span>
+    </button>
+
+    <button class="competitor-btn" onclick="selectCompetitor('infinite_campus', this)">
+      <span class="btn-name"><span class="threat-dot threat-high"></span>Infinite Campus</span>
+      <span class="btn-meta">SIS · Analytics</span>
+    </button>
+
+    <button class="competitor-btn" onclick="selectCompetitor('absence', this)">
+      <span class="btn-name"><span class="threat-dot threat-med"></span>Absence Solutions</span>
+      <span class="btn-meta">Sub Management</span>
+    </button>
+
+    <button class="competitor-btn" onclick="selectCompetitor('applitrack', this)">
+      <span class="btn-name"><span class="threat-dot threat-low"></span>AppliTrack/Hire+</span>
+      <span class="btn-meta">Talent Acquisition</span>
+    </button>
+
+    <div class="sidebar-label">Filters</div>
+    <button class="competitor-btn" style="font-size:12px; color:var(--text-muted)">All Segments</button>
+    <button class="competitor-btn" style="font-size:12px; color:var(--text-muted)">Large Districts</button>
+    <button class="competitor-btn" style="font-size:12px; color:var(--text-muted)">Mid-Market</button>
+  </aside>
+
+  <main id="main-content">
+    <!-- Rendered by JS -->
+  </main>
+</div>
+
+<script>
+// ─── MOCK DATA ───────────────────────────────────────────────────────────────
+
+const COMPETITORS = {
+  powerschool: {
+    name: "PowerSchool",
+    tagline: "K-12 SIS, HCM, Finance & Special Ed",
+    threat: "HIGH",
+    threat_color: "var(--red)",
+    collected: "6 hours ago",
+    sources: "Website · G2 Reviews · Press Releases · LinkedIn",
+    stats: [
+      { value:"~50%", label:"SIS MARKET SHARE", color:"var(--red)" },
+      { value:"15K+", label:"DISTRICTS", color:"var(--text-primary)" },
+      { value:"$2.8B", label:"VALUATION", color:"var(--text-primary)" },
+      { value:"3.8★", label:"G2 RATING", color:"var(--amber)" },
+    ],
+    summary: "PowerSchool remains Frontline's most dangerous competitor, holding dominant SIS market share and aggressively expanding into HR and Finance via acquisition. Their recent push into AI-powered analytics (PowerSchool Copilot) signals a direct move into Frontline's differentiation zone. However, their post-acquisition integration debt and consistent G2 complaints about customer support create real displacement opportunities — especially in districts currently on SIS + Frontline HR stacks.",
+    strengths: [
+      { text: "Dominant SIS installed base — 50%+ K-12 market share creates lock-in and cross-sell leverage", conf: "high" },
+      { text: "Aggressive M&A strategy: acquired Hoonuit (analytics), Schoology (LMS), Kickboard (PBIS) in 3 years", conf: "high" },
+      { text: "Single-vendor narrative resonates with IT-stretched district admins — 'one throat to choke'", conf: "high" },
+      { text: "Launched 'PowerSchool Copilot' AI assistant — getting ahead of AI narrative with sales teams", conf: "med" },
+    ],
+    weaknesses: [
+      { text: "G2 reviews consistently cite 'worst support we've ever experienced' — 31% of reviews mention support issues", conf: "high" },
+      { text: "Post-acquisition product integration is poor — Schoology, Hoonuit, and core SIS don't share a data model", conf: "high" },
+      { text: "HR/Absence Management (formerly Haiku) significantly weaker than Frontline's core product", conf: "high" },
+      { text: "Pricing has increased 30-40% for existing customers post-Vista Equity acquisition — triggering RFPs", conf: "med" },
+      { text: "Implementation timelines averaging 14 months for full suite — customers frequently miss go-live dates", conf: "med" },
+    ],
+    positioning: [
+      { text: "'One platform for the whole district' — unified data across student, staff, finance, and learning", conf: "high" },
+      { text: "Messaging heavily AI-forward since Q3 2023 — 'data-driven decisions at every level'", conf: "high" },
+      { text: "Targeting 'digital transformation' narrative at superintendent/board level, not IT", conf: "med" },
+    ],
+    recent_moves: [
+      { date: "JAN 2024", title: "Launched PowerSchool Copilot", desc: "AI assistant for administrators — can answer questions about attendance, grades, and HR data. Currently in beta with 200 districts.", type: "threat", color: "var(--red)" },
+      { date: "NOV 2023", title: "Price increases 30-40% on renewals", desc: "Multiple reliable sources (AEs + customer advisory board) confirm aggressive pricing on renewal contracts, triggering competitive reviews.", type: "opportunity", color: "var(--green)" },
+      { date: "SEP 2023", title: "Major support reorg — 600 CS reps laid off", desc: "Reduced customer success headcount significantly. G2 scores dropped from 4.1 to 3.8 in 90 days following the cuts.", type: "opportunity", color: "var(--green)" },
+      { date: "JUL 2023", title: "New CRO hired from Workday", desc: "Signals intensifying focus on enterprise sales motion and potentially larger district targets — Frontline's core market.", type: "neutral", color: "var(--amber)" },
+    ],
+    battlecard: {
+      their_strengths: [
+        "Single-vendor pitch to IT-stretched admins",
+        "SIS data advantage — everything connects to student records",
+        "Brand recognition — most K-12 admins have used PowerSchool",
+        "AI narrative (Copilot) gaining early attention"
+      ],
+      their_weaknesses: [
+        "Support scores collapsed after 2023 layoffs — use G2 data",
+        "HR/Absence product is a bolt-on, not purpose-built for K-12",
+        "Pricing up 30-40% at renewal — budget teams are unhappy",
+        "Acquisitions not integrated — admins manage 3+ logins"
+      ],
+      traps_to_set: [
+        "Ask: 'How does your HR data connect to your SIS in real-time?' — their integration is event-based, 24hr delay",
+        "Request a reference from a district that went full-suite in the last 18 months — very few successful full-suite deployments",
+        "Ask about implementation guarantees — they rarely put go-live dates in contracts",
+        "Probe support SLAs — they can't commit to < 48hr response for non-critical issues"
+      ]
+    },
+    suggested_qs: [
+      "How do we win against PowerSchool when they lead with their SIS?",
+      "What's our best counter to the PowerSchool Copilot AI pitch?",
+      "Which PowerSchool districts are most likely to churn this year?",
+      "What do PowerSchool customers hate most about their HR product?",
+      "How do we handle the 'one vendor' objection?"
+    ],
+    qa: {
+      "How do we win against PowerSchool when they lead with their SIS?": "When PowerSchool leads with SIS, reframe the conversation around staff experience vs. student records. Frontline's HR suite is purpose-built for K-12 HR — PowerSchool's HR product is a stitched-together acquisition (formerly Haiku) that even their own reps struggle to demo. Ask the district 'Who owns your substitute fill rate problem?' — that person almost always prefers Frontline. Then lock in a side-by-side absence management demo and let the product speak.",
+      "What's our best counter to the PowerSchool Copilot AI pitch?": "Acknowledge it, then pivot to trust. Ask: 'What data is Copilot actually trained on, and how do you ensure confidentiality for your staff records?' Their Copilot is currently limited to SIS data — it can't touch HR or Finance. Frontline's MCI roadmap includes AI-powered answers across HR, finance, and compliance — with human governance baked in. Position us as the 'trustworthy AI for staff decisions' vs. their 'student data AI.'",
+      "Which PowerSchool districts are most likely to churn this year?": "Focus on districts that: (1) renewed in 2021-2022 and are coming up on 3-year cycles, (2) are on the legacy Haiku HR product — these districts have the most integration pain, (3) are in the 5,000-20,000 student range — PowerSchool's support teams deprioritize mid-market. Cross-reference your SFDC with districts that opened support tickets in the last 6 months — those are warm targets.",
+      "What do PowerSchool customers hate most about their HR product?": "From 47 G2 reviews mentioning HR: top complaints are (1) absence management lacks the configurability K-12 districts need for complex CBA rules, (2) reporting requires a data team — not admin-friendly, (3) onboarding/offboarding workflows are manual and error-prone, (4) implementation took 12+ months for most districts. Lead with: 'What would it mean if your HR admins could configure absence rules without opening a ticket?' — that lands hard.",
+      "How do we handle the 'one vendor' objection?": "Validate the instinct, then reframe: 'You want fewer problems, not fewer vendors. The districts we see struggling most are the ones that went all-in on one vendor before the integrations were mature.' Then pull up our integration ecosystem — Frontline connects to 40+ SIS platforms including PowerSchool. We offer the staff-side depth plus the flexibility to keep their SIS investments. Ask: 'If PowerSchool's HR product isn't working for you in year 2, what's your exit strategy?'"
+    }
+  },
+
+  infinite_campus: {
+    name: "Infinite Campus",
+    tagline: "K-12 SIS, Analytics & Family Engagement",
+    threat: "HIGH",
+    threat_color: "var(--red)",
+    collected: "8 hours ago",
+    sources: "Website · G2 Reviews · Google News",
+    stats: [
+      { value:"~20%", label:"SIS MARKET SHARE", color:"var(--amber)" },
+      { value:"2.1K+", label:"DISTRICTS", color:"var(--text-primary)" },
+      { value:"PRIVATE", label:"OWNERSHIP", color:"var(--text-muted)" },
+      { value:"3.6★", label:"G2 RATING", color:"var(--amber)" },
+    ],
+    summary: "Infinite Campus is a strong #2 SIS player, primarily competing with Frontline in Midwest and Southeast school districts. Unlike PowerSchool, they're growing organically and have avoided the acquisition treadmill — making their product more coherent. Their primary threat is as a SIS incumbent that blocks Frontline's cross-sell into HR. Key displacement opportunity: IC has not meaningfully invested in HR/Absence, and their analytics offering is falling behind modern expectations.",
+    strengths: [
+      { text: "Perceived as 'built by educators for educators' — strong community following and user advocacy", conf: "high" },
+      { text: "No private equity ownership creates trust advantage vs. PowerSchool's Vista Equity narrative", conf: "high" },
+      { text: "Strong Midwest/Southeast footprint — high concentration in Frontline's target geographies", conf: "high" },
+      { text: "Analytics Campus product improving — added predictive grad risk and family engagement tools in 2023", conf: "med" },
+    ],
+    weaknesses: [
+      { text: "HR/Absence product is minimal and not a priority — most IC districts use third-party HR tools", conf: "high" },
+      { text: "Implementation is highly complex — districts report 18-24 month timelines for full deployment", conf: "high" },
+      { text: "Mobile app consistently receives 2-star reviews from parents — family engagement is weak", conf: "med" },
+      { text: "Professional development and training offerings lagging — no modern LMS integration", conf: "med" },
+    ],
+    positioning: [
+      { text: "'The Trusted Partner' — stable, US-based, not PE-backed, focused purely on K-12", conf: "high" },
+      { text: "Competing on relationship and community, not features — strong annual user conference", conf: "high" },
+      { text: "Recently updated messaging around 'student-centered data' — responding to SEL and equity trends", conf: "med" },
+    ],
+    recent_moves: [
+      { date: "FEB 2024", title: "Expanded Analytics Campus to include workforce data", desc: "Added basic staff attendance and HR reporting to their analytics platform — a direct move toward Frontline's territory.", type: "threat", color: "var(--red)" },
+      { date: "DEC 2023", title: "Hired VP of AI Product from Google", desc: "Signals serious investment in AI roadmap. Expect announcements at their June user conference.", type: "threat", color: "var(--amber)" },
+      { date: "OCT 2023", title: "Lost 3 large districts to PowerSchool", desc: "Three 15K+ student districts switched from IC to PS in Q4 — IC losing enterprise ground to PowerSchool's suite pitch.", type: "neutral", color: "var(--text-muted)" },
+    ],
+    battlecard: {
+      their_strengths: [
+        "Trust and community — especially with long-tenured district admins",
+        "Not PE-backed — resonates with boards tired of PowerSchool price hikes",
+        "Strong Midwest and Southeast relationships",
+        "Coherent single-product story — not an acquisition patchwork"
+      ],
+      their_weaknesses: [
+        "HR/Absence is an afterthought — most districts need a third-party solution",
+        "Implementation complexity consistently cited as #1 complaint",
+        "Mobile and family engagement weak — parents are vocal",
+        "No modern professional development or onboarding tools"
+      ],
+      traps_to_set: [
+        "Ask: 'How are you handling substitute management today?' — the answer reveals the HR gap immediately",
+        "Ask for a demo of their absence management workflow — it's 5+ manual steps vs. Frontline's automation",
+        "Request to speak with a district that added HR capabilities on top of IC — they'll hear integration pain firsthand",
+        "Ask about their AI roadmap timeline — vague answers reveal they're 12+ months behind"
+      ]
+    },
+    suggested_qs: [
+      "How do we expand into IC districts that already love their SIS?",
+      "What's the best talk track when IC districts say 'we don't want another vendor'?",
+      "What HR gaps are IC districts most frustrated with?",
+      "How does IC's analytics compare to what Frontline offers?",
+      "Which IC districts are most likely to add Frontline HR this year?"
+    ],
+    qa: {
+      "How do we expand into IC districts that already love their SIS?": "Don't fight the SIS love — join it. Position Frontline as 'the HR and staff development layer that makes IC better.' Our SFDC integration with IC is tight — HR data flows cleanly. Lead with absence management since that's IC's biggest gap. The pitch is: 'Keep IC for students, get Frontline for the humans who serve them.' Districts with strong IC loyalty are actually easier HR sells because they're not burned out on vendor switching.",
+      "What's the best talk track when IC districts say 'we don't want another vendor'?": "Acknowledge the fatigue, then be specific: 'What if adding Frontline actually reduced your HR admin workload by 30%? That's what we see in comparable IC districts.' Then offer to bring in a peer district for a 20-minute call. IC districts trust other IC districts. The reference sell works much better than a feature pitch here.",
+      "What HR gaps are IC districts most frustrated with?": "Based on win-loss data and G2 reviews: (1) substitute management — IC's fill process is manual and stressful for coordinators, (2) FMLA and leave tracking — districts are using spreadsheets, (3) onboarding — new hire workflows aren't connected to payroll, (4) professional development tracking for licensure compliance. Start with subs — it's the immediate pain that gets a meeting.",
+      "How does IC's analytics compare to what Frontline offers?": "IC Analytics Campus is improving but is primarily student-focused. Their workforce data addition in Feb 2024 is basic — attendance and headcount reporting. Frontline's HR analytics includes turnover prediction, absence pattern analysis, certification expiration alerts, and compensation benchmarking. Key differentiator: our data is staff-specific and actionable for HR teams, not just reporting for administrators.",
+      "Which IC districts are most likely to add Frontline HR this year?": "Prioritize: districts with 1,000-5,000 students in your existing IC territory that (1) have a dedicated HR director (not just a superintendent doing HR), (2) have had substitute fill rate complaints in board meetings, (3) are in states with new certification compliance requirements (check your state legislative tracker). Run a pull from SFDC of IC districts with open support tickets or NPS < 7 — those are your warmest targets."
+    }
+  },
+
+  absence: {
+    name: "Absence Solutions / Sub Central",
+    tagline: "Substitute Management & Absence Tracking",
+    threat: "MEDIUM",
+    threat_color: "var(--amber)",
+    collected: "12 hours ago",
+    sources: "Website · G2 Reviews · News",
+    stats: [
+      { value:"~15%", label:"ABSENCE MKT SHARE", color:"var(--amber)" },
+      { value:"800+", label:"DISTRICTS", color:"var(--text-primary)" },
+      { value:"PRIVATE", label:"OWNERSHIP", color:"var(--text-muted)" },
+      { value:"3.4★", label:"G2 RATING", color:"var(--red)" },
+    ],
+    summary: "Absence Solutions (Sub Central) competes directly with Frontline's Absence & Substitute product. They're a single-purpose player in a market where suite vendors like Frontline increasingly have the advantage. Their main appeal is pricing — typically 20-30% cheaper than Frontline Absence. However, their product has stagnated and mobile adoption is poor. Districts that outgrow absence-only solutions are natural Frontline converts.",
+    strengths: [
+      { text: "Lower price point — typically 20-30% less than Frontline Absence on a per-sub basis", conf: "high" },
+      { text: "Easier implementation — districts can be live in 30-60 days vs. Frontline's 90-120", conf: "med" },
+      { text: "Perceived as 'purpose-built' for absence — no bloat from broader HR modules", conf: "med" },
+    ],
+    weaknesses: [
+      { text: "Product hasn't had a major release in 18 months — feature gap is widening", conf: "high" },
+      { text: "No mobile app for substitutes — subs must use desktop or call-in system", conf: "high" },
+      { text: "No integration with benefits, payroll, or onboarding — creates data silos", conf: "high" },
+      { text: "Small support team — response times frequently cited as 3-5 business days", conf: "med" },
+    ],
+    positioning: [
+      { text: "Pure-play 'absence experts' — not trying to be everything", conf: "high" },
+      { text: "Competing on ease and price — 'just works for subs'", conf: "high" },
+    ],
+    recent_moves: [
+      { date: "JAN 2024", title: "Launched basic mobile web app", desc: "Mobile-responsive web portal for substitutes — not a native app. Partially addresses the mobile gap but not competitive with Frontline's native app.", type: "neutral", color: "var(--amber)" },
+      { date: "Q3 2023", title: "Lost 4 districts to Frontline", desc: "4 known districts (all 2,000-8,000 students) converted to Frontline after seeking broader HR integration.", type: "opportunity", color: "var(--green)" },
+    ],
+    battlecard: {
+      their_strengths: [
+        "Price — 20-30% lower than Frontline Absence standalone",
+        "Fast implementation — 30-60 days",
+        "Simple, familiar product for long-term users"
+      ],
+      their_weaknesses: [
+        "No native mobile app — subs hate this",
+        "No HR integration — creates duplicate data entry",
+        "Product stagnating — no major releases in 18 months",
+        "Tiny support team — response times are days, not hours"
+      ],
+      traps_to_set: [
+        "Ask: 'Can your subs accept jobs from their phone?' — their web app is not competitive",
+        "Ask: 'How does absence data connect to your payroll system?' — it doesn't, automatically",
+        "Ask for their product roadmap — they likely can't share a meaningful one",
+        "Calculate total cost of admin time spent reconciling absence data vs. payroll — often exceeds the price difference"
+      ]
+    },
+    suggested_qs: [
+      "How do we beat Sub Central on price?",
+      "Why would a district switch from Sub Central if they're happy with it?",
+      "What's our mobile story vs. their web app?"
+    ],
+    qa: {
+      "How do we beat Sub Central on price?": "Reframe from per-module price to total cost of ownership. Sub Central saves $X upfront but districts spend an average of 8 admin hours/week reconciling absence data with payroll — calculate that cost. Then add: with Frontline, absence data flows directly to payroll and HR analytics. The 'cheaper' product often costs more in staff time. If needed, offer a TCO calculator workshop before the proposal.",
+      "Why would a district switch from Sub Central if they're happy with it?": "Happy Sub Central districts have one of two triggers: (1) they're hiring an HR director and need real HR infrastructure — that's the moment to pitch the full Frontline suite, or (2) sub fill rates are declining and coordinators are frustrated — Frontline's AI-powered fill recommendations and mobile-first sub experience are a compelling upgrade story. Don't fight inertia — wait for the trigger.",
+      "What's our mobile story vs. their web app?": "Frontline Absence has a native iOS and Android app for substitutes with push notifications, one-tap job acceptance, and offline support. Sub Central launched a mobile-responsive web portal in January — it requires a browser, doesn't send native notifications, and can't work offline. If a district's subs are younger and mobile-first (they all are), demo the native app side-by-side. Fill rates improve 15-20% when subs can accept jobs in one tap."
+    }
+  },
+
+  applitrack: {
+    name: "AppliTrack / Hire+",
+    tagline: "K-12 Talent Acquisition & Applicant Tracking",
+    threat: "LOW",
+    threat_color: "var(--green)",
+    collected: "1 day ago",
+    sources: "Website · G2",
+    stats: [
+      { value:"~10%", label:"ATS MARKET SHARE", color:"var(--green)" },
+      { value:"500+", label:"DISTRICTS", color:"var(--text-primary)" },
+      { value:"PRIVATE", label:"OWNERSHIP", color:"var(--text-muted)" },
+      { value:"3.2★", label:"G2 RATING", color:"var(--red)" },
+    ],
+    summary: "AppliTrack (now branded Hire+) competes with Frontline's Recruiting product. Threat level is low — they're narrowly focused on applicant tracking without broader HR integration, and their product is dated. The main risk is as an incumbent in districts not yet on Frontline's talent suite. Their G2 reviews suggest significant dissatisfaction, making them a good displacement target.",
+    strengths: [
+      { text: "K-12 specific applicant tracking — not a generic ATS adapted for education", conf: "high" },
+      { text: "Low-cost entry point for small districts with simple hiring needs", conf: "med" },
+      { text: "Some long-tenure districts have deep institutional familiarity", conf: "med" },
+    ],
+    weaknesses: [
+      { text: "No onboarding, HR management, or absence integration — pure ATS only", conf: "high" },
+      { text: "UI hasn't been meaningfully updated in 5+ years per user reviews", conf: "high" },
+      { text: "G2 rating at 3.2 — consistent complaints about slow candidate experience", conf: "high" },
+      { text: "No AI-powered candidate matching or screening tools", conf: "high" },
+    ],
+    positioning: [
+      { text: "K-12 specialist positioning — 'built for how schools hire'", conf: "high" },
+      { text: "Low-touch, low-cost positioning — minimal services required", conf: "med" },
+    ],
+    recent_moves: [
+      { date: "Q4 2023", title: "Rebranded to Hire+", desc: "Attempted product repositioning with rebrand — no significant product changes reported alongside the name change.", type: "neutral", color: "var(--amber)" },
+    ],
+    battlecard: {
+      their_strengths: [
+        "Familiar to long-tenure HR admins who resist change",
+        "Lower price for ATS-only buyers",
+        "K-12 specific workflows"
+      ],
+      their_weaknesses: [
+        "No onboarding integration — candidate to employee experience is disconnected",
+        "Outdated UI — candidates complain about mobile experience",
+        "No AI screening or matching",
+        "Pure ATS with no path to broader HR suite"
+      ],
+      traps_to_set: [
+        "Ask: 'When a hire is made, how do they flow into onboarding and payroll?' — the answer exposes the integration gap",
+        "Ask a candidate to apply on mobile — the experience speaks for itself",
+        "Ask about their AI roadmap for screening — they likely have none",
+        "Calculate time-to-hire vs. Frontline Recruiting customers — significant difference"
+      ]
+    },
+    suggested_qs: [
+      "How do we displace AppliTrack in districts where they're entrenched?",
+      "What's our AI recruiting story vs. their basic ATS?"
+    ],
+    qa: {
+      "How do we displace AppliTrack in districts where they're entrenched?": "Target the new HR director or superintendent — long-tenure admins who've used AppliTrack for years are the defenders. New leadership brings openness to change. Lead with candidate experience: show a Frontline mobile application flow vs. theirs. Then connect it to time-to-hire data — teacher shortages make slow hiring an existential issue for districts. AppliTrack entrenched accounts are also usually not on Frontline for absence/HR, so the suite story lands hard.",
+      "What's our AI recruiting story vs. their basic ATS?": "Frontline Recruiting includes AI-powered candidate scoring, automated reference checks, and predictive fit scoring based on district-specific criteria. AppliTrack/Hire+ has no AI capabilities. When districts are dealing with 200+ applicants per posting and a 3-person HR team, AI screening isn't a nice-to-have — it's how you keep up. Demo the candidate scoring workflow and let them see the time savings. Ask: 'How many hours per week does your team spend reviewing unqualified applications?'"
+    }
+  }
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+
+let current = 'powerschool';
+let currentTab = 'overview';
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+
+function selectCompetitor(id, btn) {
+  current = id;
+  currentTab = 'overview';
+  document.querySelectorAll('.competitor-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+function render() {
+  const d = COMPETITORS[current];
+  const main = document.getElementById('main-content');
+
+  main.innerHTML = `
+    <div class="comp-header">
+      <div class="comp-title">${d.name}</div>
+      <div class="comp-subtitle">
+        <span>${d.tagline}</span>
+        <span class="comp-tag" style="border-color:${d.threat_color};color:${d.threat_color}">
+          ● ${d.threat} THREAT
+        </span>
+        <span class="comp-tag">⏱ ${d.collected}</span>
+        <span class="comp-tag">📡 ${d.sources}</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn ${currentTab==='overview'?'active':''}" data-tab="overview" onclick="switchTab('overview')">Overview</button>
+      <button class="tab-btn ${currentTab==='battlecard'?'active':''}" data-tab="battlecard" onclick="switchTab('battlecard')">Battlecard</button>
+      <button class="tab-btn ${currentTab==='moves'?'active':''}" data-tab="moves" onclick="switchTab('moves')">Recent Moves</button>
+      <button class="tab-btn ${currentTab==='answers'?'active':''}" data-tab="answers" onclick="switchTab('answers')">MCI Answers</button>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="tab-content ${currentTab==='overview'?'active':''}" id="tab-overview">
+      <div class="stats-row">
+        ${d.stats.map(s => `
+          <div class="stat-card">
+            <div class="stat-value" style="color:${s.color}">${s.value}</div>
+            <div class="stat-label">${s.label}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="summary-card">
+        <div class="card-title" style="margin-bottom:12px">
+          <span class="icon">📋</span> EXECUTIVE SUMMARY
+        </div>
+        <div class="summary-text">${d.summary}</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title" style="color:var(--red)"><span class="icon">⚠</span> THEIR STRENGTHS — Know Before You Go In</div>
+          <div class="insight-list">
+            ${d.strengths.map(i => `
+              <div class="insight-item">
+                <div class="insight-bullet" style="background:var(--red)"></div>
+                <div>${i.text}<span class="badge badge-${i.conf}">${i.conf.toUpperCase()}</span></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:var(--green)"><span class="icon">🎯</span> EXPLOITABLE WEAKNESSES</div>
+          <div class="insight-list">
+            ${d.weaknesses.map(i => `
+              <div class="insight-item">
+                <div class="insight-bullet" style="background:var(--green)"></div>
+                <div>${i.text}<span class="badge badge-${i.conf}">${i.conf.toUpperCase()}</span></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-title"><span class="icon">📣</span> HOW THEY POSITION</div>
+        <div class="insight-list">
+          ${d.positioning.map(i => `
+            <div class="insight-item">
+              <div class="insight-bullet" style="background:var(--teal)"></div>
+              <div>${i.text}<span class="badge badge-${i.conf}">${i.conf.toUpperCase()}</span></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- BATTLECARD -->
+    <div class="tab-content ${currentTab==='battlecard'?'active':''}" id="tab-battlecard">
+      <div class="battlecard">
+        <div class="bc-section strengths">
+          <div class="bc-title red">⚔ Their Strengths — What They'll Lead With</div>
+          ${d.battlecard.their_strengths.map(s => `<div class="bc-item">${s}</div>`).join('')}
+        </div>
+        <div class="bc-section weaknesses">
+          <div class="bc-title green">✓ Their Weaknesses — Where We Win</div>
+          ${d.battlecard.their_weaknesses.map(s => `<div class="bc-item">${s}</div>`).join('')}
+        </div>
+        <div class="bc-section traps">
+          <div class="bc-title amber">🪤 Discovery Traps — Questions That Expose Their Gaps</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px">
+            ${d.battlecard.traps_to_set.map(s => `<div class="bc-item">${s}</div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT MOVES -->
+    <div class="tab-content ${currentTab==='moves'?'active':''}" id="tab-moves">
+      <div class="card">
+        <div class="card-title"><span class="icon">📡</span> INTELLIGENCE FEED — Recent Activity</div>
+        <div class="timeline">
+          ${d.recent_moves.map(m => `
+            <div class="timeline-item">
+              <div class="timeline-date">${m.date}</div>
+              <div class="timeline-dot" style="background:${m.color};box-shadow:0 0 6px ${m.color}"></div>
+              <div class="timeline-content">
+                <div class="timeline-title">${m.title}</div>
+                <div class="timeline-desc">${m.desc}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- MCI ANSWERS -->
+    <div class="tab-content ${currentTab==='answers'?'active':''}" id="tab-answers">
+      <div class="chat-layout">
+        <div class="chat-panel">
+          <div class="chat-header">
+            <div>
+              <div class="chat-header-text">⚡ MCI Answers</div>
+              <div class="chat-header-sub">Ask anything about ${d.name}</div>
+            </div>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <div class="msg assistant">
+              <div class="msg-bubble">
+                Ask me anything about <strong>${d.name}</strong> — how to win against them, their weaknesses, which districts to target, or how to handle objections.
+              </div>
+              <div class="msg-time">MCI Agent · ready</div>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <input class="chat-input" id="chat-input" placeholder="Ask about ${d.name}..." onkeydown="if(event.key==='Enter')sendMessage()">
+            <button class="chat-send" onclick="sendMessage()">➤</button>
+          </div>
+        </div>
+        <div class="suggested-qs">
+          <h4>Suggested Questions</h4>
+          ${d.suggested_qs.map(q => `
+            <button class="suggested-q" onclick="askQuestion(this, \`${q}\`)">${q}</button>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ─── CHAT ────────────────────────────────────────────────────────────────────
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  handleChat(q);
+}
+
+function askQuestion(btn, q) {
+  btn.style.opacity = '0.5';
+  setTimeout(() => btn.style.opacity = '1', 2000);
+  switchTab('answers');
+  setTimeout(() => handleChat(q), 100);
+}
+
+function handleChat(question) {
+  const messages = document.getElementById('chat-messages');
+  const d = COMPETITORS[current];
+
+  // User message
+  messages.innerHTML += `
+    <div class="msg user">
+      <div class="msg-bubble">${question}</div>
+      <div class="msg-time">You · just now</div>
+    </div>
+  `;
+
+  // Typing indicator
+  const typingId = 'typing-' + Date.now();
+  messages.innerHTML += `
+    <div class="msg assistant" id="${typingId}">
+      <div class="typing"><span></span><span></span><span></span></div>
+    </div>
+  `;
+  messages.scrollTop = messages.scrollHeight;
+
+  // Find best answer
+  setTimeout(() => {
+    const typing = document.getElementById(typingId);
+    const answer = findAnswer(d, question);
+    if (typing) {
+      typing.innerHTML = `
+        <div class="msg-bubble">${answer}</div>
+        <div class="msg-time">MCI Agent · now</div>
+      `;
+    }
+    messages.scrollTop = messages.scrollHeight;
+  }, 1200 + Math.random() * 600);
+}
+
+function findAnswer(d, question) {
+  // Exact match first
+  if (d.qa[question]) return d.qa[question];
+
+  // Fuzzy match
+  const ql = question.toLowerCase();
+  for (const [key, val] of Object.entries(d.qa)) {
+    const keywords = key.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+    const matches = keywords.filter(k => ql.includes(k)).length;
+    if (matches >= 3) return val;
+  }
+
+  // Contextual fallback using company data
+  return `Great question about ${d.name}. Based on the latest intelligence collected ${d.collected}: ${d.summary} 
+  <br><br>
+  For more specific guidance on this topic, try one of the suggested questions on the right — or connect this tool to a live Claude API key to get AI-generated answers for any question you throw at it.`;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
